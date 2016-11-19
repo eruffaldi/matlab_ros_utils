@@ -1,5 +1,8 @@
-function m = jointstates2mat(j)
+function [m,jn] = jointstates2mat(j,separate)
 
+if nargin == 1
+    separate = 0;
+end
 
 v = zeros(length(j),length(j{1}.position));
 t = zeros(length(j),1);
@@ -12,5 +15,16 @@ end
 m = dataset();
 m.time = t;
 m.mtime = unix2matlab(t);
-m.joints = v;
 
+jn = j{1}.name;
+jn = cell2struct(num2cell(1:length(jn))',jn);
+
+if separate
+    ff = fieldnames(jn);
+    for I=1:length(ff)
+        m.(ff{I}) = v(:,jn.(ff{I}));
+    end
+else
+    m.joints = v;
+end
+    
