@@ -1,5 +1,5 @@
 % if the cloud is integral then ...
-function nxyz = estimate_normals_int(xyz,depth,r,mode)
+function nxyz = estimate_normals_int(xyz,r,mode)
 
 % http://pointclouds.org/documentation/tutorials/normal_estimation_using_integral_images.php
 %http://islab.ulsan.ac.kr/files/announcement/411/Adaptive%20Neighborhood%20Selection%20for%20Real-Time%20Surface%20Normal.pdf
@@ -25,7 +25,9 @@ function nxyz = estimate_normals_int(xyz,depth,r,mode)
 
 %The COVARIANCE_MATRIX mode creates 9 integral images to compute the normal for a specific point from the covariance matrix of its local neighborhood. The AVERAGE_3D_GRADIENT mode creates 6 integral images to compute smoothed versions of horizontal and vertical 3D gradients and computes the normals using the cross-product between these two gradients. The AVERAGE_DEPTH_CHANGE mode creates only a single integral image and computes the normals from the average depth changes.
 
-IPz = integralImage(depth);
+d = xyz(:,:,3);
+d(isnan(d)) = 0;
+IPz = integralImage(d);
 S = @(I,m,n,r) (1/4/r^2)*(I(m+r,n+r)-I(m-r,n+r)-I(m+r,n-r)+I(m-r,n-r));
 Px = xyz(:,:,1);
 Py = xyz(:,:,2);
@@ -35,7 +37,7 @@ switch(mode)
     case 'avg3d'        
     case 'avgdepth' 
     for m=1+r:size(Px,1)-r
-        for n=1+r:size(Py,1)-r
+        for n=1+r:size(Px,2)-r
             vphx = (Px(m+r,n)- Px(m-r,n))/2;
             vphy = (Py(m+r,n)- Py(m-r,n))/2;
             %regionSum = J(eR+1,eC+1) - J(eR+1,sC) - J(sR,eC+1) + J(sR,sC)
